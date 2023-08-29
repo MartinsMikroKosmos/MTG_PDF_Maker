@@ -2,7 +2,7 @@ import os
 import time
 import requests
 from PIL import Image
-from io import BytesIO
+import pretty_errors
 from fpdf import FPDF
 from PyPDF2 import PdfMerger
 
@@ -103,4 +103,4 @@ def create_pdf(cards, original_filename):
 
 
 # Starte den Prozess mit der Eingabedatei 'Atraxa.txt'
-get_card_images_from_file('/Users/install/Desktop/Privat/Decks/Nahiri Commander.txt')
+get_card_images_from_file('/Users/install/Desktop/Privat/Decks/Deck - Omanthy Nath.txt')

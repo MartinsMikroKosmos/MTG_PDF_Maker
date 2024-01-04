@@ -30,6 +30,16 @@ def get_card_images_from_file(filename):
 
 # Funktion, um PDFs für die Karten zu erstellen und sie dann zusammenzuführen
 def create_pdf(cards, original_filename):
+    """
+    Create a PDF file containing images and names of cards.
+
+    Args:
+        cards (list): A list of tuples containing the quantity and name of each card.
+        original_filename (str): The original filename of the PDF.
+
+    Returns:
+        None
+    """
     pdf_merger = PdfMerger()  # Initialisiere den PDF-Merger
 
     for index, card_info in enumerate(cards):
@@ -38,24 +48,29 @@ def create_pdf(cards, original_filename):
         url = 'https://api.scryfall.com/cards/named'
         params = {'fuzzy': card_name}
 
-        response = requests.get(url, params=params)
-        data = response.json()
-        time.sleep(0.1)
-
         try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            time.sleep(0.1)
+
             image_url = data['image_uris']['large']
             print(f"Bild URL: {image_url}")
+
+            image_response = requests.get(image_url)
+            image_response.raise_for_status()
+            if image_response.status_code == 200:
+                with open(f"downloaded_image_{index}.jpg", "wb") as f:
+                    f.write(image_response.content)
+                print(f"Bild {index} erfolgreich heruntergeladen und gespeichert.")
+            else:
+                print("Fehler beim Herunterladen des Bildes.")
+        except requests.exceptions.RequestException as e:
+            print(f"Fehler bei der Anfrage: {e}")
+            continue
         except KeyError:
             print(f"Fehler: Bild URL nicht gefunden für Karte '{card_name}'. Überspringe...")
             continue
-
-        image_response = requests.get(image_url)
-        if image_response.status_code == 200:
-            with open(f"downloaded_image_{index}.jpg", "wb") as f:
-                f.write(image_response.content)
-            print(f"Bild {index} erfolgreich heruntergeladen und gespeichert.")
-        else:
-            print("Fehler beim Herunterladen des Bildes.")
 
         image = Image.open(f"downloaded_image_{index}.jpg")
 
@@ -103,4 +118,6 @@ def create_pdf(cards, original_filename):
 
 
 # Starte den Prozess mit der Eingabedatei 'Atraxa.txt'
-get_card_images_from_file('/Users/install/Desktop/Privat/Decks/Deck - Omanthy Nath.txt')
+get_card_images_from_file('/Users/martinrichter/Desktop/Neuer Ordner/rocco-exile-20231228-193600.txt')
+# /Users/martinrichter/Desktop/Neuer Ordner/roccos-modern-chef-20231228-205646.txt
+# /Users/martinrichter/Desktop/Neuer Ordner/rocco-exile-20231228-193600.txt
